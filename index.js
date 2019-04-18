@@ -12,6 +12,10 @@ const schema = buildSchema(`
 		books(topic: String): [Book]
 	}
 
+	type Mutation {
+		updateBookTopic(id: Int!, topic: String!): Book
+	}
+
 	type Book {
 		id: Int
 		title: String
@@ -28,7 +32,7 @@ let getBook = (args) => {
 	})[0]
 }
 
-let getBooks = () => {
+let getBooks = (args) => {
 	if (args.topic) {
 		let topic = args.topic;
 		return books.filter(book => book.topic === topic);
@@ -37,8 +41,20 @@ let getBooks = () => {
 	}
 }
 
+let updateBookTopic = ({id, topic}) => {
+	books.map(book => {
+		if (book.id === id) {
+			book.topic = topic;
+			return book;
+		}
+	})
+	return books.filter(book => book.id === id)[0];
+}
+
 const root = {
-	book: getBook
+	book: getBook,
+	books: getBooks,
+	updateBookTopic: updateBookTopic
 }
 
 app.use('/graphql', express_graphql({
